@@ -75,15 +75,15 @@ import android.widget.RadioGroup;
 import android.widget.TabHost;
 import android.widget.TextView;
 
-public class KerberosAppActivity extends TabActivity
+public class KerberosAppActivity extends TabActivity implements KinitPrompter, AppendTextInterface
 {
     /* Native JNI function declarations */
-    public native int nativeSetKRB5CCNAME(String path);
-    public native int nativeSetKRB5CONFIG(String path);
-    public native int nativeKinit(String argv, int argc);
-    public native int nativeKlist(String argv, int argc);
-    public native int nativeKvno(String argv, int argc);
-    public native int nativeKdestroy(String argv, int argc);
+    public static native int nativeSetKRB5CCNAME(String path);
+    public static native int nativeSetKRB5CONFIG(String path);
+    public static native int nativeKinit(String argv, int argc, AppendTextInterface at, KinitPrompter kp);
+    public static native int nativeKlist(String argv, int argc, AppendTextInterface at);
+    public static native int nativeKvno(String argv, int argc, AppendTextInterface at);
+    public static native int nativeKdestroy(String argv, int argc, AppendTextInterface at);
 
     /* Server Information for Client Application */    
     private static int port                = 0;
@@ -153,7 +153,7 @@ public class KerberosAppActivity extends TabActivity
     					+ uid + " " + prinValue;
 			}
 	                
-	        int t = nativeKinit(argString, countWords(argString));        
+	        int t = nativeKinit(argString, countWords(argString), KerberosAppActivity.this, KerberosAppActivity.this);     
 	        
 	        Log.i("---JAVA JNI---", "Return value from native lib: " + t);
 	        	        
@@ -165,7 +165,7 @@ public class KerberosAppActivity extends TabActivity
 		}
 	};
 	
-	private String[] kinitPrompter(String name, String banner,
+	public String[] kinitPrompter(String name, String banner,
 			final Prompt[] prompts)
 	{
 		final String[] results = new String[prompts.length];
@@ -200,7 +200,7 @@ public class KerberosAppActivity extends TabActivity
 			
 	        String argString = "-c /data/local/kerberos/ccache/krb5cc_" + uid;
 	                
-	        int t = nativeKlist(argString, countWords(argString));
+	        int t = nativeKlist(argString, countWords(argString), KerberosAppActivity.this);
 	        Log.i("---JAVA JNI---", "Return value from native lib: " + t);
 	        	        
 	        if(t == 1)
@@ -226,7 +226,7 @@ public class KerberosAppActivity extends TabActivity
 			String argString = "-c /data/local/kerberos/ccache/krb5cc_" + 
                 uid + " -k /data/local/kerberos/krb5.keytab " + prinValue;
 	                
-	        int t = nativeKvno(argString, countWords(argString));
+	        int t = nativeKvno(argString, countWords(argString), KerberosAppActivity.this);
 	        Log.i("---JAVA JNI---", "Return value from native lib: " + t);
 	        	        
 	        if(t == 0)
@@ -249,7 +249,7 @@ public class KerberosAppActivity extends TabActivity
 			
 	        String argString = "-c /data/local/kerberos/ccache/krb5cc_" + uid;
 	                
-	        int t = nativeKdestroy(argString, countWords(argString));
+	        int t = nativeKdestroy(argString, countWords(argString), KerberosAppActivity.this);
 	        Log.i("---JAVA JNI---", "Return value from native lib: " + t);
 	        
 	        if(t == 0)
@@ -330,7 +330,7 @@ public class KerberosAppActivity extends TabActivity
     {
         super.onDestroy();
 	    String argString = "-c /data/local/kerberos/ccache/krb5cc_" + uid;
-	    int t = nativeKdestroy(argString, countWords(argString));
+	    int t = nativeKdestroy(argString, countWords(argString), KerberosAppActivity.this);
     }
 	
     /**
@@ -454,7 +454,7 @@ public class KerberosAppActivity extends TabActivity
      * Appends text to the main output TextView.
      * @param input
      */
-    private void appendText(String input) 
+    public void appendText(String input) 
     {
     	TextView tv = (TextView) findViewById(R.id.textViewClient);
     	tv.append(input);

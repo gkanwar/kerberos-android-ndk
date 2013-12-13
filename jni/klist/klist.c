@@ -57,7 +57,7 @@
 #ifdef ANDROID
 #include "kerberosapp.h"
 static JNIEnv* jni_env; 
-static jobject class_obj;
+static jclass global_cls;
 #else
 #define log(...)    fprintf(stderr, __VA_ARGS__)
 #endif /* ANDROID */
@@ -113,9 +113,9 @@ static void usage()
 #ifdef ANDROID
 
 int
-klist_driver(env, obj, argc, argv)
+klist_driver(env, cls, argc, argv)
     JNIEnv* env;
-    jobject obj;
+    jclass cls;
     int argc;
     char **argv;
 {
@@ -125,7 +125,7 @@ klist_driver(env, obj, argc, argv)
 
     /* save JNI environment */ 
     jni_env = GetJNIEnv(cached_jvm);
-    class_obj = obj;
+    global_cls = cls;
     
     /* reset getopt() */ 
     optind = 1;

@@ -35,7 +35,8 @@
 
 /* Global JNI Variables */
 JavaVM* cached_jvm;
-jobject cached_obj;
+jclass cached_cls;
+jobject cached_at;
 
 /*
  * Generate NULL-terminated argv array from a string.
@@ -129,7 +130,8 @@ JNIEXPORT void JNICALL JNI_OnUnload(JavaVM *jvm, void *reserved)
         return;
     }
 
-    (*env)->DeleteGlobalRef(env, cached_obj);
+    (*env)->DeleteGlobalRef(env, cached_cls);
+    (*env)->DeleteGlobalRef(env, cached_at);
     return;
 
 }
@@ -144,7 +146,7 @@ JNIEXPORT void JNICALL JNI_OnUnload(JavaVM *jvm, void *reserved)
  *
  */
 JNIEXPORT jint JNICALL Java_edu_mit_kerberos_KerberosAppActivity_nativeSetKRB5CCNAME
-  (JNIEnv* env, jobject obj, jstring argString)
+  (JNIEnv* env, jclass cls, jstring argString)
 {
     jboolean isCopy;
     int ret;
@@ -171,7 +173,7 @@ JNIEXPORT jint JNICALL Java_edu_mit_kerberos_KerberosAppActivity_nativeSetKRB5CC
  *
  */
 JNIEXPORT jint JNICALL Java_edu_mit_kerberos_KerberosAppActivity_nativeSetKRB5CONFIG
-  (JNIEnv* env, jobject obj, jstring argString)
+  (JNIEnv* env, jclass cls, jstring argString)
 {
     jboolean isCopy;
     int ret;
@@ -197,7 +199,7 @@ JNIEXPORT jint JNICALL Java_edu_mit_kerberos_KerberosAppActivity_nativeSetKRB5CO
  *
  */
 JNIEXPORT jint JNICALL Java_edu_mit_kerberos_KerberosAppActivity_nativeKinit
-  (JNIEnv* env, jobject obj, jstring argString, jint argCount)
+  (JNIEnv* env, jclass cls, jstring argString, jint argCount, jobject at_obj, jobject kp_obj)
 {
     jboolean isCopy;
     int ret;
@@ -207,7 +209,9 @@ JNIEXPORT jint JNICALL Java_edu_mit_kerberos_KerberosAppActivity_nativeKinit
     char **argv = (char**)malloc((numArgs+2) * sizeof(char*));
 
     /* Cache a reference to the calling object */
-    cached_obj = (*env)->NewGlobalRef(env, obj);
+    cached_cls = (*env)->NewGlobalRef(env, cls);
+    /* Cache a reference to the appendtext object */
+    cached_at = (*env)->NewGlobalRef(env, at_obj);
 
     /* get original argv string from Java */
     args = (*env)->GetStringUTFChars(env, argString, &isCopy);
@@ -223,7 +227,7 @@ JNIEXPORT jint JNICALL Java_edu_mit_kerberos_KerberosAppActivity_nativeKinit
     generateArgv(args_copy, numArgs, argv);
 
     /* run kinit */
-    ret = kinit_driver(env, obj, numArgs+1, argv); 
+    ret = kinit_driver(env, cls, numArgs+1, argv, kp_obj);
    
     free(args_copy);
     releaseArgv(numArgs+1, argv);
@@ -242,7 +246,7 @@ JNIEXPORT jint JNICALL Java_edu_mit_kerberos_KerberosAppActivity_nativeKinit
  *
  */
 JNIEXPORT jint JNICALL Java_edu_mit_kerberos_KerberosAppActivity_nativeKlist
-  (JNIEnv* env, jobject obj, jstring argString, jint argCount)
+  (JNIEnv* env, jclass cls, jstring argString, jint argCount, jobject at_obj)
 {
     jboolean isCopy;
     int ret;
@@ -252,7 +256,9 @@ JNIEXPORT jint JNICALL Java_edu_mit_kerberos_KerberosAppActivity_nativeKlist
     char **argv = (char**)malloc((numArgs+2) * sizeof(char*));
 
     /* Cache a reference to the calling object */
-    cached_obj = (*env)->NewGlobalRef(env, obj);
+    cached_cls = (*env)->NewGlobalRef(env, cls);
+    /* Cache a reference to the appendtext object */
+    cached_at = (*env)->NewGlobalRef(env, at_obj);
 
     /* get original argv string from Java */
     args = (*env)->GetStringUTFChars(env, argString, &isCopy);
@@ -268,7 +274,7 @@ JNIEXPORT jint JNICALL Java_edu_mit_kerberos_KerberosAppActivity_nativeKlist
     generateArgv(args_copy, numArgs, argv);
 
     /* run kinit */
-    ret = klist_driver(env, obj, numArgs+1, argv); 
+    ret = klist_driver(env, cls, numArgs+1, argv);
    
     free(args_copy);
     releaseArgv(numArgs+1, argv);
@@ -287,7 +293,7 @@ JNIEXPORT jint JNICALL Java_edu_mit_kerberos_KerberosAppActivity_nativeKlist
  *
  */
 JNIEXPORT jint JNICALL Java_edu_mit_kerberos_KerberosAppActivity_nativeKvno
-  (JNIEnv* env, jobject obj, jstring argString, jint argCount)
+  (JNIEnv* env, jclass cls, jstring argString, jint argCount, jobject at_obj)
 {
     jboolean isCopy;
     int ret;
@@ -297,7 +303,9 @@ JNIEXPORT jint JNICALL Java_edu_mit_kerberos_KerberosAppActivity_nativeKvno
     char **argv = (char**)malloc((numArgs+2) * sizeof(char*));
 
     /* Cache a reference to the calling object */
-    cached_obj = (*env)->NewGlobalRef(env, obj);
+    cached_cls = (*env)->NewGlobalRef(env, cls);
+    /* Cache a reference to the appendtext object */
+    cached_at = (*env)->NewGlobalRef(env, at_obj);
 
     /* get original argv string from Java */
     args = (*env)->GetStringUTFChars(env, argString, &isCopy);
@@ -313,7 +321,7 @@ JNIEXPORT jint JNICALL Java_edu_mit_kerberos_KerberosAppActivity_nativeKvno
     generateArgv(args_copy, numArgs, argv);
 
     /* run kinit */
-    ret = kvno_driver(env, obj, numArgs+1, argv); 
+    ret = kvno_driver(env, cls, numArgs+1, argv);
    
     free(args_copy);
     releaseArgv(numArgs+1, argv);
@@ -332,7 +340,7 @@ JNIEXPORT jint JNICALL Java_edu_mit_kerberos_KerberosAppActivity_nativeKvno
  *
  */
 JNIEXPORT jint JNICALL Java_edu_mit_kerberos_KerberosAppActivity_nativeKdestroy
-  (JNIEnv* env, jobject obj, jstring argString, jint argCount)
+  (JNIEnv* env, jclass cls, jstring argString, jint argCount, jobject at_obj)
 {
     jboolean isCopy;
     int ret;
@@ -342,7 +350,9 @@ JNIEXPORT jint JNICALL Java_edu_mit_kerberos_KerberosAppActivity_nativeKdestroy
     char **argv = (char**)malloc((numArgs+2) * sizeof(char*));
 
     /* Cache a reference to the calling object */
-    cached_obj = (*env)->NewGlobalRef(env, obj);
+    cached_cls = (*env)->NewGlobalRef(env, cls);
+    /* Cache a reference to the appendtext object */
+    cached_at = (*env)->NewGlobalRef(env, at_obj);
 
     /* get original argv string from Java */
     args = (*env)->GetStringUTFChars(env, argString, &isCopy);
@@ -358,7 +368,7 @@ JNIEXPORT jint JNICALL Java_edu_mit_kerberos_KerberosAppActivity_nativeKdestroy
     generateArgv(args_copy, numArgs, argv);
 
     /* run kdestroy */
-    ret = kdestroy_driver(env, obj, numArgs+1, argv); 
+    ret = kdestroy_driver(env, cls, numArgs+1, argv);
    
     free(args_copy);
     releaseArgv(numArgs+1, argv);
@@ -407,13 +417,13 @@ void androidError(const char* progname, errcode_t code, const char* format, ...)
 int appendText(char* input)
 {
     JNIEnv* env;
-    jclass cls;         /* edu.mit.kerberos.KerberosApp */
     jmethodID mid;      /* edu.mit.kerberos.KerberosApp.appendText() */
     jstring javaOutput; /* text to append */
+    jclass cls;
   
     env = GetJNIEnv(cached_jvm);
-    cls = (*env)->GetObjectClass(env, cached_obj);
-    mid = (*env)->GetMethodID(env, cls, "appendText", 
+    cls = (*env)->GetObjectClass(env, cached_at);
+    mid = (*env)->GetMethodID(env, cls, "appendText",
             "(Ljava/lang/String;)V");
     if (mid == 0)
     {
@@ -422,13 +432,13 @@ int appendText(char* input)
     }
     else {
         javaOutput = (*env)->NewStringUTF(env, input);
-        if (env == NULL || cached_obj == NULL || 
+        if (env == NULL || cached_at == NULL ||
             mid == NULL || javaOutput == NULL)
         {
             LOGI("We have a null variable in native code");
             return 1;
         }
-        (*env)->CallVoidMethod(env, cached_obj, mid, javaOutput);
+        (*env)->CallVoidMethod(env, cached_at, mid, javaOutput);
     }
     return 0;
 }

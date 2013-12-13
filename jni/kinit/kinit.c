@@ -41,7 +41,8 @@
 #ifdef ANDROID
 #include "kerberosapp.h"
 static JNIEnv* jni_env;
-static jobject class_obj;
+static jclass global_cls;
+static jobject global_kp_obj;
 #else
 #define log(...)    fprintf(stderr, __VA_ARGS__)
 #endif /* ANDROID */
@@ -617,7 +618,6 @@ kinit_prompter(
     jmethodID prompt_constructor_id;
     jobject prompt;
 
-    jclass calling_class;
     jmethodID prompter_method_id;
 
     jobjectArray result_array;
@@ -645,13 +645,12 @@ kinit_prompter(
         (*jni_env)->SetObjectArrayElement(jni_env, prompt_array, i, prompt);
     }
 
-    calling_class = (*jni_env)->GetObjectClass(jni_env, class_obj);
     prompter_method_id =
-    (*jni_env)->GetMethodID(jni_env, calling_class, "kinitPrompter",
+    (*jni_env)->GetMethodID(jni_env, global_cls, "kinitPrompter",
             "(Ljava/lang/String;Ljava/lang/String;[Ledu/mit/kerberos/Prompt;)[Ljava/lang/String;");
 
     // make the call
-    result_array = (*jni_env)->CallObjectMethod(jni_env, class_obj, 
+    result_array = (*jni_env)->CallObjectMethod(jni_env, global_kp_obj,
             prompter_method_id, name_string, banner_string, prompt_array);
 
     if (result_array == NULL)
@@ -918,11 +917,12 @@ main(argc, argv)
 }
 #else /* ANDROID */
 int
-kinit_driver(env, obj, argc, argv)
+kinit_driver(env, cls, argc, argv, kp_obj)
     JNIEnv* env;
-    jobject obj;
+    jclass cls;
     int argc;
     char **argv;
+    jobject kp_obj;
 {
     struct k_opts opts;
     struct k5_data k5;
@@ -930,7 +930,8 @@ kinit_driver(env, obj, argc, argv)
 
     /* save JNI environment */ 
     jni_env = env;
-    class_obj = obj;
+    global_cls = cls;
+    global_kp_obj = kp_obj;
     
     /* reset getopt() */ 
     optind = 1;

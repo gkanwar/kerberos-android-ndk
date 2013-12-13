@@ -47,7 +47,7 @@ extern "C" {
  *
  */
 JNIEXPORT jint JNICALL Java_edu_mit_kerberos_KerberosAppActivity_nativeSetKRB5CCNAME
-  (JNIEnv* env, jobject obj, jstring argString);
+  (JNIEnv* env, jclass cls, jstring argString);
 
 /*
  * Class:     edu_mit_kerberos_KerberosAppActivity
@@ -59,15 +59,15 @@ JNIEXPORT jint JNICALL Java_edu_mit_kerberos_KerberosAppActivity_nativeSetKRB5CC
  *
  */
 JNIEXPORT jint JNICALL Java_edu_mit_kerberos_KerberosAppActivity_nativeSetKRB5CONFIG
-  (JNIEnv* env, jobject obj, jstring argString);
+  (JNIEnv* env, jclass cls, jstring argString);
 
 /*
  * Class:     edu_mit_kerberos_KerberosAppActivity
  * Method:    nativeKinit
- * Signature: (Ljava/lang/String;I)I
+ * Signature: (Ljava/lang/String;ILjava/lang/Class;)I
  */
 JNIEXPORT jint JNICALL Java_edu_mit_kerberos_KerberosAppActivity_nativeKinit
-  (JNIEnv *, jobject, jstring, jint);
+  (JNIEnv *, jclass, jstring, jint, jobject, jobject);
 
 /*
  * Class:     edu_mit_kerberos_KerberosAppActivity
@@ -75,7 +75,7 @@ JNIEXPORT jint JNICALL Java_edu_mit_kerberos_KerberosAppActivity_nativeKinit
  * Signature: (Ljava/lang/String;I)I
  */
 JNIEXPORT jint JNICALL Java_edu_mit_kerberos_KerberosAppActivity_nativeKlist
-  (JNIEnv *, jobject, jstring, jint);
+  (JNIEnv *, jclass, jstring, jint, jobject);
 
 /*
  * Class:     edu_mit_kerberos_KerberosAppActivity
@@ -83,7 +83,7 @@ JNIEXPORT jint JNICALL Java_edu_mit_kerberos_KerberosAppActivity_nativeKlist
  * Signature: (Ljava/lang/String;I)I
  */
 JNIEXPORT jint JNICALL Java_edu_mit_kerberos_KerberosAppActivity_nativeKvno
-  (JNIEnv *, jobject, jstring, jint);
+  (JNIEnv *, jclass, jstring, jint, jobject);
 
 /*
  * Class:     edu_mit_kerberos_KerberosAppActivity
@@ -91,7 +91,7 @@ JNIEXPORT jint JNICALL Java_edu_mit_kerberos_KerberosAppActivity_nativeKvno
  * Signature: (Ljava/lang/String;I)I
  */
 JNIEXPORT jint JNICALL Java_edu_mit_kerberos_KerberosAppActivity_nativeKdestroy
-  (JNIEnv *, jobject, jstring, jint);
+  (JNIEnv *, jclass, jstring, jint, jobject);
 
 #ifdef __cplusplus
 }

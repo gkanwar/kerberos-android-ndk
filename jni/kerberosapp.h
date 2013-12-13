@@ -41,7 +41,8 @@ extern "C" {
 #include <com_err.h>
 
 extern JavaVM* cached_jvm;
-extern jobject cached_obj;
+extern jclass cached_cls;
+extern jobject cached_at;
 
 #define MAX_APPEND_STRING_SZ    4096
 
@@ -59,10 +60,10 @@ extern void androidPrint(const char*, ...);
 extern void androidError(const char*, errcode_t, const char*, ...);
 extern int appendText(char*);
 
-extern int kinit_driver(JNIEnv*, jobject, int, char**);
-extern int klist_driver(JNIEnv*, jobject, int, char**);
-extern int kvno_driver(JNIEnv*, jobject, int, char**);
-extern int kdestroy_driver(JNIEnv*, jobject, int, char**);
+extern int kinit_driver(JNIEnv*, jclass, int, char**, jobject);
+extern int klist_driver(JNIEnv*, jclass, int, char**);
+extern int kvno_driver(JNIEnv*, jclass, int, char**);
+extern int kdestroy_driver(JNIEnv*, jclass, int, char**);
 
 #ifdef __cplusplus
 }

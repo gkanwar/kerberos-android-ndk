@@ -89,7 +89,7 @@ public class Oid {
             for (int i = 0; i < tmpOid.length-2; i++) {
                 shortDerOid[i] = tmpOid[i+2];
             }
-            this.oid = new gss_OID_desc(shortDerOid);
+            this.oid = new gss_OID_desc(new String(shortDerOid));
 
             /* store der-encoded Oid in object for future use */ 
             this.derOid = new byte[tmpOid.length];
@@ -127,7 +127,7 @@ public class Oid {
         for (int i = 0; i < derOid.length-2; i++) {
             shortDerOid[i] = derOid[i+2];
         }
-        this.oid = new gss_OID_desc(shortDerOid);
+        this.oid = new gss_OID_desc(new String(shortDerOid));
        
         /* store der-encoded Oid in object for future use */ 
         this.derOid = new byte[derOid.length];

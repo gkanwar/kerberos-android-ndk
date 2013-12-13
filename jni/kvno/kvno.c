@@ -40,7 +40,7 @@
 #ifdef ANDROID
 #include "kerberosapp.h"
 static JNIEnv* jni_env; 
-static jobject class_obj;
+static jclass global_cls;
 #else
 #define log(...)    fprintf(stderr, __VA_ARGS__)
 #endif /* ANDROID */
@@ -70,7 +70,7 @@ static void extended_com_err_fn (const char *, errcode_t, const char *,
                                  va_list);
 
 #ifdef ANDROID
-int kvno_driver(JNIEnv* env, jobject obj, int argc, char *argv[])
+int kvno_driver(JNIEnv* env, jclass cls, int argc, char *argv[])
 {
     int option;
     char *etypestr = NULL, *ccachestr = NULL, *keytab_name = NULL;
@@ -79,7 +79,7 @@ int kvno_driver(JNIEnv* env, jobject obj, int argc, char *argv[])
 
     /* save JNI environment */ 
     jni_env = GetJNIEnv(cached_jvm);
-    class_obj = obj;
+    global_cls = cls;
     
     /* reset getopt() */ 
     optind = 1;
