@@ -437,7 +437,7 @@ public class KerberosAppActivity extends TabActivity implements KinitPrompter, A
      * @param input
      * @return Number of words in string, delimited by a space
      */
-    public int countWords(String input)
+    public static int countWords(String input)
     {
     	String[] words = input.split(" ");
     	return words.length;
@@ -690,4 +690,18 @@ public class KerberosAppActivity extends TabActivity implements KinitPrompter, A
         return SUCCESS;
 
     } /* end doCommunication() */
+    
+    /*
+     * Wrapper for the native functions
+     */
+    public static int kinit(String principal, AppendTextInterface at, KinitPrompter kp) {
+        String argString = "-V -c /data/local/kerberos/ccache/krb5cc_"
+                + uid + " " + principal;
+        return nativeKinit(argString, countWords(argString), at, kp);
+    }
+    public static int kvno(String principal, AppendTextInterface at) {
+        String argString = "-c /data/local/kerberos/ccache/krb5cc_" + 
+                uid + " -k /data/local/kerberos/krb5.keytab " + principal;
+        return nativeKvno(argString, countWords(argString), at);
+    }
 }

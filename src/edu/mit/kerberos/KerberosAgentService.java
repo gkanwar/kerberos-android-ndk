@@ -16,7 +16,7 @@ import android.os.Message;
 import android.os.Process;
 import android.util.Log;
 
-public class KerberosAgentService extends Service {
+public class KerberosAgentService extends Service implements KinitPrompter, AppendTextInterface{
     private Looper mServiceLooper;
     private ServiceHandler mServiceHandler;
     
@@ -70,21 +70,57 @@ public class KerberosAgentService extends Service {
                     char[] full_msg; 
                     try {
                         full_msg = getFullMsg(input);
-                        Log.i("KERBEROS", "Got packet: " + new String(full_msg));
                     }
                     catch (NumberFormatException e) {
+                        host.close();
                         continue;
                     }
                     Log.v("KERBEROS", new String(full_msg));
                     String[] tokens = new String(full_msg).split("\n");
                     if (tokens.length < 2) {
+                        host.close();
                         continue;
                     }
                     String cmd = tokens[0];
-                    if (cmd == "ticket") {
+                    Log.v("KERBEROS", "Cmd: " + cmd);
+                    if (cmd.equals("ticket")) {
                         String service = tokens[1];
+                        if (service.startsWith("krbtgt")) {
+                            Log.w("KERBEROS", "Attempt to get krbtgt");
+                            host.close();
+                            continue;
+                        }
+                        // TODO: User confirmation
                         Log.i("KERBEROS", "Got service ticket request: " + service);
+                        int ret = KerberosAppActivity.kvno(service, KerberosAgentService.this);
+                        if (ret != 0) {
+                            // Fail
+                            Log.e("KERBEROS", "Agent ticket request failed: " + service + ", err code: " + ret);
+                            host.getOutputStream().write("FAIL".getBytes());
+                        }
+                        else {
+                            // Success
+                            Log.i("KERBEROS", "Agent ticket request success: " + service);
+                            // TODO: Send the ticket itself
+                            host.getOutputStream().write("OK".getBytes());
+                        }
                     }
+                    else if (cmd.equals("kinit")) {
+                        String principal = tokens[1];
+                        Log.i("KERBEROS", "Got kinit request: " + principal);
+                        int ret = KerberosAppActivity.kinit(principal, KerberosAgentService.this, KerberosAgentService.this);
+                        if (ret != 0) {
+                            // Fail
+                            Log.e("KERBEROS", "Agent kinit failed: " + principal + ", err code: " + ret);
+                            host.getOutputStream().write("FAIL".getBytes());
+                        }
+                        else {
+                            // Success
+                            Log.i("KERBEROS", "Agent kinit success: " + principal);
+                            host.getOutputStream().write("OK".getBytes());
+                        }
+                    }
+                    host.close();
                 }
             }
             catch (IOException e) {
@@ -114,5 +150,20 @@ public class KerberosAgentService extends Service {
         
         // If we get killed after returning from here, restart
         return START_STICKY;
+    }
+
+    @Override
+    public void appendText(String input) {
+        Log.i("KERBEROS", input);
+    }
+
+    @Override
+    public String[] kinitPrompter(String name, String banner, Prompt[] prompts) {
+        // TODO: Implement this cleanly
+        String[] out = new String[prompts.length];
+        for (int i = 0; i < prompts.length; ++i) {
+            out[i] = "";
+        }
+        return out;
     }
 }

@@ -615,6 +615,7 @@ kinit_prompter(
 
     jobjectArray prompt_array;
     jclass prompt_class;
+    jclass prompter_cls;
     jmethodID prompt_constructor_id;
     jobject prompt;
 
@@ -645,8 +646,9 @@ kinit_prompter(
         (*jni_env)->SetObjectArrayElement(jni_env, prompt_array, i, prompt);
     }
 
+    prompter_cls = (*jni_env)->GetObjectClass(jni_env, global_kp_obj);
     prompter_method_id =
-    (*jni_env)->GetMethodID(jni_env, global_cls, "kinitPrompter",
+    (*jni_env)->GetMethodID(jni_env, prompter_cls, "kinitPrompter",
             "(Ljava/lang/String;Ljava/lang/String;[Ledu/mit/kerberos/Prompt;)[Ljava/lang/String;");
 
     // make the call
