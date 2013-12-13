@@ -47,15 +47,22 @@
  */
 package edu.mit.kerberos;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
-import android.app.Activity;
+import org.ietf.jgss.GSSContext;
+import org.ietf.jgss.GSSCredential;
+import org.ietf.jgss.GSSException;
+import org.ietf.jgss.GSSManager;
+import org.ietf.jgss.GSSName;
+import org.ietf.jgss.MessageProp;
+import org.ietf.jgss.Oid;
+
 import android.app.TabActivity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
@@ -63,13 +70,10 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.TextView;
-import android.widget.RadioGroup;
 import android.widget.RadioButton;
-import android.widget.LinearLayout;
+import android.widget.RadioGroup;
 import android.widget.TabHost;
-
-import org.ietf.jgss.*;
+import android.widget.TextView;
 
 public class KerberosAppActivity extends TabActivity
 {
@@ -423,6 +427,9 @@ public class KerberosAppActivity extends TabActivity
             tv2.append("Failed to set KRB5_CONFIG path correctly\n");
         }
         
+        /* Start up the Kerberos agent service */
+        Intent i = new Intent(this, KerberosAgentService.class);
+        startService(i);
     }
     
     /**

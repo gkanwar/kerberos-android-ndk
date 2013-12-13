@@ -1,1 +1,5 @@
 src/edu/mit/jgss/swig/*.java
+gen/
+bin/
+obj/
+libs/
