@@ -379,6 +379,53 @@ JNIEXPORT jint JNICALL Java_edu_mit_kerberos_KerberosAppActivity_nativeKdestroy
 }
 
 /*
+ * Class:     edu_mit_kerberos_KerberosAppActivity
+ * Method:    nativeKserialize
+ * Signature: (Ljava/lang/String;I)I
+ *
+ * Wrapper around native kserialize application
+ *
+ */
+JNIEXPORT jint JNICALL Java_edu_mit_kerberos_KerberosAppActivity_nativeKserialize
+  (JNIEnv* env, jclass cls, jstring argString, jint argCount, jobject at_obj)
+{
+    jboolean isCopy;
+    int ret;
+    int numArgs = (int) argCount;
+    const char *args;
+    char *args_copy;
+    char **argv = (char**)malloc((numArgs+2) * sizeof(char*));
+
+    /* Cache a reference to the calling object */
+    cached_cls = (*env)->NewGlobalRef(env, cls);
+    /* Cache a reference to the appendtext object */
+    cached_at = (*env)->NewGlobalRef(env, at_obj);
+
+    /* get original argv string from Java */
+    args = (*env)->GetStringUTFChars(env, argString, &isCopy);
+
+    /* make a copy of argString to use with strtok */
+    args_copy = malloc(strlen(args) + 1);
+    strcpy(args_copy, args);
+
+    /* free argString */
+    (*env)->ReleaseStringUTFChars(env, argString, args);
+
+    /* generate argv list */
+    generateArgv(args_copy, numArgs, argv);
+
+    /* run kdestroy */
+    ret = kserialize_driver(env, cls, numArgs+1, argv);
+
+    free(args_copy);
+    releaseArgv(numArgs+1, argv);
+
+    if(ret == 1)
+        return 1;
+    return 0;
+}
+
+/*
  * Android log function, printf-style.
  * Logs input string to GUI TextView.
  */
@@ -404,6 +451,8 @@ void androidError(const char* progname, errcode_t code, const char* format, ...)
     va_start(args, format);
     vsnprintf(errString+6, sizeof(errString), format, args);
     strcat(errString, "\n");
+    appendText(errString);
+    snprintf(errString, sizeof(errString), "Error code: %d\n", (int)code);
     appendText(errString);
     va_end(args); 
 }

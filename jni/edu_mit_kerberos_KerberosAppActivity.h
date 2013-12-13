@@ -93,6 +93,14 @@ JNIEXPORT jint JNICALL Java_edu_mit_kerberos_KerberosAppActivity_nativeKvno
 JNIEXPORT jint JNICALL Java_edu_mit_kerberos_KerberosAppActivity_nativeKdestroy
   (JNIEnv *, jclass, jstring, jint, jobject);
 
+/*
+ * Class:     edu_mit_kerberos_KerberosAppActivity
+ * Method:    nativeKserialize
+ * Signature: (Ljava/lang/String;I)I
+ */
+JNIEXPORT jint JNICALL Java_edu_mit_kerberos_KerberosAppActivity_nativeKserialize
+  (JNIEnv *, jclass, jstring, jint, jobject);
+
 #ifdef __cplusplus
 }
 #endif

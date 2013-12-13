@@ -84,6 +84,7 @@ public class KerberosAppActivity extends TabActivity implements KinitPrompter, A
     public static native int nativeKlist(String argv, int argc, AppendTextInterface at);
     public static native int nativeKvno(String argv, int argc, AppendTextInterface at);
     public static native int nativeKdestroy(String argv, int argc, AppendTextInterface at);
+    public static native int nativeKserialize(String argv, int argc, AppendTextInterface at);
 
     /* Server Information for Client Application */    
     private static int port                = 0;
@@ -703,5 +704,10 @@ public class KerberosAppActivity extends TabActivity implements KinitPrompter, A
         String argString = "-c /data/local/kerberos/ccache/krb5cc_" + 
                 uid + " -k /data/local/kerberos/krb5.keytab " + principal;
         return nativeKvno(argString, countWords(argString), at);
+    }
+    public static int kserialize(String principal, String outfile_name, AppendTextInterface at) {
+        String argString = "/data/local/kerberos/ccache/krb5cc_" + uid + " " +
+                principal + " " + outfile_name;
+        return nativeKserialize(argString, countWords(argString), at);
     }
 }

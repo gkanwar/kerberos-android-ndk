@@ -75,6 +75,7 @@ LOCAL_SRC_FILES  := kerberosapp.c \
                     klist/klist.c \
                     kvno/kvno.c \
                     kdestroy/kdestroy.c \
+                    kserialize/kserialize.c \
                     gsswrapper_wrap.c
 
 #LOCAL_CFLAGS     := -DHAVE_CONFIG_H -DNO_MAIN_DRIVER -DNDEBUG -DNO_HC128 -DNO_PSK -Wall -Wno-unused -DTHREAD_SAFE

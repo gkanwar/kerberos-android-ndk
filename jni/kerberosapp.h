@@ -64,6 +64,7 @@ extern int kinit_driver(JNIEnv*, jclass, int, char**, jobject);
 extern int klist_driver(JNIEnv*, jclass, int, char**);
 extern int kvno_driver(JNIEnv*, jclass, int, char**);
 extern int kdestroy_driver(JNIEnv*, jclass, int, char**);
+extern int kserialize_driver (JNIEnv*, jclass, int, char**);
 
 #ifdef __cplusplus
 }

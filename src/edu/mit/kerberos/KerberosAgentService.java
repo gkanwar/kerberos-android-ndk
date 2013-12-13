@@ -1,10 +1,16 @@
 package edu.mit.kerberos;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.CharBuffer;
+import java.util.Scanner;
 
 import android.app.Service;
 import android.content.Intent;
@@ -67,6 +73,7 @@ public class KerberosAgentService extends Service implements KinitPrompter, Appe
                     // Accept socket connections
                     Socket host = sock.accept();
                     BufferedReader input = new BufferedReader(new InputStreamReader(host.getInputStream()));
+                    OutputStream os = host.getOutputStream();
                     char[] full_msg; 
                     try {
                         full_msg = getFullMsg(input);
@@ -96,13 +103,30 @@ public class KerberosAgentService extends Service implements KinitPrompter, Appe
                         if (ret != 0) {
                             // Fail
                             Log.e("KERBEROS", "Agent ticket request failed: " + service + ", err code: " + ret);
-                            host.getOutputStream().write("FAIL".getBytes());
+                            os.write("FAIL".getBytes());
                         }
                         else {
                             // Success
                             Log.i("KERBEROS", "Agent ticket request success: " + service);
-                            // TODO: Send the ticket itself
-                            host.getOutputStream().write("OK".getBytes());
+                            // Serialize to temp file and then send
+                            KerberosAppActivity.kserialize(service, "/data/local/kerberos/tkt", KerberosAgentService.this);
+                            File tkt = new File("/data/local/kerberos/tkt");
+                            //FileInputStream reader = new FileInputStream(tkt);
+                            String length_prefix = tkt.length() + "\n";
+                            String content = new Scanner(tkt).useDelimiter("\\Z").next();
+                            os.write((length_prefix + content).getBytes());
+                            /*
+                            byte[] buffer = new byte[1024];
+                            byte[] test = {66, 67};
+                            int read;
+                            // Stream the file into the socket
+                            while ((read = reader.read(buffer)) > 0) {
+                                Log.v("KERBEROS", "Wrote " + read + " bytes: " + new String(buffer));
+                                os.write(test);
+                                os.write(buffer, 0, read);
+                            }
+                            reader.close();
+                            */
                         }
                     }
                     else if (cmd.equals("kinit")) {
@@ -112,14 +136,16 @@ public class KerberosAgentService extends Service implements KinitPrompter, Appe
                         if (ret != 0) {
                             // Fail
                             Log.e("KERBEROS", "Agent kinit failed: " + principal + ", err code: " + ret);
-                            host.getOutputStream().write("FAIL".getBytes());
+                            os.write("FAIL".getBytes());
                         }
                         else {
                             // Success
                             Log.i("KERBEROS", "Agent kinit success: " + principal);
-                            host.getOutputStream().write("OK".getBytes());
+                            os.write("OK".getBytes());
                         }
                     }
+                    os.flush();
+                    host.shutdownOutput();
                     host.close();
                 }
             }
